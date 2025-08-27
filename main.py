@@ -6,7 +6,7 @@ import pandas as pd
 import json
 
 # === Read CSV with video titles and URLs ===
-df = pd.read_csv("topstep.csv", sep=";", header=None, names=["Title", "URL"])
+df = pd.read_csv("topstep.csv")
 
 def sanitize_filename(name: str) -> str:
     """Remove invalid filename characters for Windows/Linux/Mac."""

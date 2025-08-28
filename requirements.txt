@@ -1,0 +1,8 @@
+matplotlib==3.10.5
+MetaTrader5==5.0.5200
+mss==10.1.0
+numpy==2.3.2
+opencv_python==4.11.0.86
+pandas==2.3.2
+Pillow==11.3.0
+protobuf==6.32.0

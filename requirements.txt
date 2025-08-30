@@ -5,4 +5,4 @@ opencv_python==4.11.0.86
 pandas==2.3.2
 Pillow==11.3.0
 protobuf==6.32.0
-MetaTrader5
+mt5linux

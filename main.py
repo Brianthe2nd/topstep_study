@@ -5,6 +5,8 @@ import subprocess
 import pandas as pd
 import json
 
+
+
 # === Read CSV with video titles and URLs ===
 df = pd.read_csv("topstep.csv")
 
@@ -112,3 +114,14 @@ for _, row in df.iterrows():
     except Exception as e:
         print(f"[ERROR] {folder} failed:", e)
 
+# terminate_instance.py
+
+def shutdown_instance():
+    try:
+        print("Shutting down the instance...")
+        # run the shutdown command
+        subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
+    except Exception as e:
+        print(f"Failed to shutdown: {e}")
+
+shutdown_instance()

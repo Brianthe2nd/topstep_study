@@ -127,6 +127,10 @@ for _, row in df.iterrows():
     print("\n=== Starting:", folder, "===")
     try:
         video_file = download_video(url, folder)
+        print("\n")
+        print("video has been downloaded")
+        print("\n")
+        
         process_video(folder, video_file)
 
         with open(finished_file, "a") as f:

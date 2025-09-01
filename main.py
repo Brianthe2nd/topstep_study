@@ -4,7 +4,7 @@ import shutil
 import subprocess
 import pandas as pd
 import json
-
+import sys
 
 
 # === Read CSV with video titles and URLs ===
@@ -66,22 +66,42 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
     return video_file
 
 
+import sys
+import importlib.util
+from pathlib import Path
+
 def process_video(folder: str, video_file: str):
     """
-    Runs run.py inside the folder that already contains
-    the downloaded video and copied template.
+    Runs run.py inside the given folder without using subprocess.
     """
-    subprocess.run(
-        ["python", "run.py", video_file],
-        cwd=folder,
-        check=True
-    )
-    print(f"[process_video] {folder} processed")
+    run_path = Path(folder) / "run.py"
+    if not run_path.exists():
+        raise FileNotFoundError(f"{run_path} not found")
 
-    # Delete video after processing to save space
-    if os.path.exists(video_file):
-        os.remove(video_file)
-        print(f"[cleanup] Deleted {video_file}")
+    # Load run.py dynamically
+    spec = importlib.util.spec_from_file_location("run_module", run_path)
+    run_module = importlib.util.module_from_spec(spec)
+    sys.modules["run_module"] = run_module
+    spec.loader.exec_module(run_module)
+
+    if not hasattr(run_module, "main"):
+        raise AttributeError("run.py must define a function named 'main'")
+
+    # Save old sys.argv so we don’t mess up the caller
+    old_argv = sys.argv[:]
+    sys.argv = [str(run_path), video_file]
+
+    try:
+        run_module.main()
+        print("[process_video] Completed successfully")
+    except Exception as e:
+        print(f"[process_video] Error: {e}")
+        raise
+    finally:
+        # Restore argv
+        sys.argv = old_argv
+
+
 
 
 # === Main execution (sequential) ===

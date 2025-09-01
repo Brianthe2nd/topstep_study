@@ -74,6 +74,7 @@ def process_video(folder: str, video_file: str):
     """
     Runs run.py inside the given folder without using subprocess.
     """
+    print("starting process video: ", video_file)
     run_path = Path(folder) / "run.py"
     if not run_path.exists():
         raise FileNotFoundError(f"{run_path} not found")

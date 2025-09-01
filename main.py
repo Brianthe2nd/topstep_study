@@ -5,6 +5,8 @@ import subprocess
 import pandas as pd
 import json
 import sys
+import traceback
+
 
 
 # === Read CSV with video titles and URLs ===
@@ -140,7 +142,9 @@ for _, row in df.iterrows():
             f.write(folder + " done\n")
 
     except Exception as e:
+        
         print(f"[ERROR] {folder} failed:", e)
+        traceback.print_exc()
 
 # terminate_instance.py
 

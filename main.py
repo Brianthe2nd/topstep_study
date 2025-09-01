@@ -25,6 +25,9 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
     Also copies the template into the folder after download.
     Returns the full path of the downloaded video file.
     """
+    print("\n")
+    print("starting download video: ", url)
+    print("The url sent to download video is: ", url)
     # Ensure folder exists
     os.makedirs(folder, exist_ok=True)
     folder_name = os.path.basename(os.path.normpath(folder))

@@ -78,35 +78,29 @@ from pathlib import Path
 def process_video(folder: str, video_file: str):
     """
     Runs run.py inside the given folder without using subprocess.
+    Ensures that imports inside run.py (like `from main import ...`) work.
     """
-    print("starting process video: ", video_file)
     run_path = Path(folder) / "run.py"
     if not run_path.exists():
         raise FileNotFoundError(f"{run_path} not found")
 
-    # Load run.py dynamically
+    # Make sure the run.py folder is on sys.path
+    sys.path.insert(0, str(folder))
+
     spec = importlib.util.spec_from_file_location("run_module", run_path)
     run_module = importlib.util.module_from_spec(spec)
     sys.modules["run_module"] = run_module
     spec.loader.exec_module(run_module)
 
-    if not hasattr(run_module, "main"):
-        raise AttributeError("run.py must define a function named 'main'")
-
-    # Save old sys.argv so we don’t mess up the caller
     old_argv = sys.argv[:]
     sys.argv = [str(run_path), video_file]
 
     try:
         run_module.main()
         print("[process_video] Completed successfully")
-    except Exception as e:
-        print(f"[process_video] Error: {e}")
-        raise
     finally:
-        # Restore argv
         sys.argv = old_argv
-
+        sys.path.pop(0)  # cleanup
 
 
 

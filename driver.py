@@ -8,7 +8,7 @@ import sys
 import traceback
 import importlib.util
 from pathlib import Path
-
+from cookies import acquire_cookie,release_cookie
 
 
 # === Read CSV with video titles and URLs ===
@@ -36,7 +36,7 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
     os.makedirs(folder, exist_ok=True)
     folder_name = os.path.basename(os.path.normpath(folder))
     output_template = os.path.join(folder, f"{folder_name}.%(ext)s")
-
+    cookies = acquire_cookie()
     # Download video
     cmd = [
         "yt-dlp",
@@ -70,7 +70,7 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
                 shutil.copy2(src, dst)
 
     print(f"[download_video] {folder} ready with template + video")
-    return video_file
+    return video_file,cookies
 
 
 
@@ -133,10 +133,12 @@ for _, row in df.iterrows():
 
     print("\n=== Starting:", folder, "===")
     try:
-        video_file = download_video(url, folder)
+        video_file,cookies = download_video(url, folder)
         print("\n")
         print("video has been downloaded")
         print("\n")
+        print("Realeasing cookies")
+        release_cookie(cookies)
         
         process_video(folder, video_file)
 

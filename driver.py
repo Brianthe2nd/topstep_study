@@ -74,42 +74,33 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
 
 
 
+
 def process_video(folder: str, video_file: str):
+    """
+    Runs run.py inside the given folder using subprocess.
+    This ensures imports are resolved correctly within that folder.
+    """
     run_path = Path(folder) / "run.py"
     if not run_path.exists():
         raise FileNotFoundError(f"{run_path} not found")
 
-    # Add folder to sys.path
-    sys.path.insert(0, str(folder))
+    # Use the same Python interpreter
+    python_exec = sys.executable
 
-    # --- Cleanup: remove any previously loaded modules from this folder ---
-    to_remove = []
-    for name, module in list(sys.modules.items()):
-        try:
-            file = getattr(module, "__file__", None)
-            if file and str(folder) in file:
-                to_remove.append(name)
-        except Exception:
-            continue
-    for name in to_remove:
-        sys.modules.pop(name, None)
+    # Run the script as a subprocess
+    result = subprocess.run(
+        [python_exec, str(run_path), video_file],
+        cwd=str(folder),          # set working dir to the video folder
+        capture_output=True,      # capture stdout/stderr
+        text=True
+    )
 
-    # Load run.py dynamically
-    spec = importlib.util.spec_from_file_location("run_module", run_path)
-    run_module = importlib.util.module_from_spec(spec)
-    sys.modules["run_module"] = run_module
-    spec.loader.exec_module(run_module)
+    if result.returncode != 0:
+        print(f"[process_video] ERROR running {run_path.name}")
+        print(result.stderr)
+        raise RuntimeError(f"{run_path} failed with exit code {result.returncode}")
 
-    old_argv = sys.argv[:]
-    sys.argv = [str(run_path), video_file]
-
-    try:
-        run_module.main()
-        print(f"[process_video] Completed successfully for {video_file}")
-    finally:
-        sys.argv = old_argv
-        sys.path.pop(0)
-
+    print(f"[process_video] Completed successfully:\n{result.stdout}")
 
 
 # === Main execution (sequential) ===

@@ -6,6 +6,8 @@ import pandas as pd
 import json
 import sys
 import traceback
+import importlib.util
+from pathlib import Path
 
 
 
@@ -71,22 +73,28 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
     return video_file
 
 
-import sys
-import importlib.util
-from pathlib import Path
 
 def process_video(folder: str, video_file: str):
-    """
-    Runs run.py inside the given folder without using subprocess.
-    Ensures that imports inside run.py (like `from main import ...`) work.
-    """
     run_path = Path(folder) / "run.py"
     if not run_path.exists():
         raise FileNotFoundError(f"{run_path} not found")
 
-    # Make sure the run.py folder is on sys.path
+    # Add folder to sys.path
     sys.path.insert(0, str(folder))
 
+    # --- Cleanup: remove any previously loaded modules from this folder ---
+    to_remove = []
+    for name, module in list(sys.modules.items()):
+        try:
+            file = getattr(module, "__file__", None)
+            if file and str(folder) in file:
+                to_remove.append(name)
+        except Exception:
+            continue
+    for name in to_remove:
+        sys.modules.pop(name, None)
+
+    # Load run.py dynamically
     spec = importlib.util.spec_from_file_location("run_module", run_path)
     run_module = importlib.util.module_from_spec(spec)
     sys.modules["run_module"] = run_module
@@ -97,10 +105,10 @@ def process_video(folder: str, video_file: str):
 
     try:
         run_module.main()
-        print("[process_video] Completed successfully")
+        print(f"[process_video] Completed successfully for {video_file}")
     finally:
         sys.argv = old_argv
-        sys.path.pop(0)  # cleanup
+        sys.path.pop(0)
 
 
 

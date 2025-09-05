@@ -37,40 +37,44 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
     folder_name = os.path.basename(os.path.normpath(folder))
     output_template = os.path.join(folder, f"{folder_name}.%(ext)s")
     cookies = acquire_cookie()
+    try :
     # Download video
-    cmd = [
-        "yt-dlp",
-        "-f", "bestvideo",            # video only
-        "--cookies", cookies,         # include cookies
-        "-o", output_template,        # output file path
-        url
-    ]
-    subprocess.run(cmd, check=True)
+        cmd = [
+            "yt-dlp",
+            "-f", "bestvideo",            # video only
+            "--cookies", cookies,         # include cookies
+            "-o", output_template,        # output file path
+            url
+        ]
+        subprocess.run(cmd, check=True)
 
-    # Find downloaded video file
-    video_files = [f for f in os.listdir(folder) if f.endswith((".mp4", ".mkv", ".webm"))]
-    if not video_files:
-        raise FileNotFoundError(f"No video downloaded in {folder}")
-    video_file = os.path.join(folder, video_files[0])
+        # Find downloaded video file
+        video_files = [f for f in os.listdir(folder) if f.endswith((".mp4", ".mkv", ".webm"))]
+        if not video_files:
+            raise FileNotFoundError(f"No video downloaded in {folder}")
+        video_file = os.path.join(folder, video_files[0])
 
-    # Save metadata
-    metadata = {"video_name": folder, "video_title": folder, "video_url": url}
-    with open(os.path.join(folder, "info.json"), "w") as f:
-        json.dump(metadata, f, indent=2)
+        # Save metadata
+        metadata = {"video_name": folder, "video_title": folder, "video_url": url}
+        with open(os.path.join(folder, "info.json"), "w") as f:
+            json.dump(metadata, f, indent=2)
 
-    # Copy template into the folder (without overwriting)
-    for item in os.listdir(TEMPLATE):
-        src = os.path.join(TEMPLATE, item)
-        dst = os.path.join(folder, item)
-        if os.path.isdir(src):
-            if not os.path.exists(dst):
-                shutil.copytree(src, dst)
-        else:
-            if not os.path.exists(dst):
-                shutil.copy2(src, dst)
+        # Copy template into the folder (without overwriting)
+        for item in os.listdir(TEMPLATE):
+            src = os.path.join(TEMPLATE, item)
+            dst = os.path.join(folder, item)
+            if os.path.isdir(src):
+                if not os.path.exists(dst):
+                    shutil.copytree(src, dst)
+            else:
+                if not os.path.exists(dst):
+                    shutil.copy2(src, dst)
 
-    print(f"[download_video] {folder} ready with template + video")
-    return video_file,cookies
+        print(f"[download_video] {folder} ready with template + video")
+        release_cookie(cookies)
+    except:
+        release_cookie(cookies)
+    return video_file
 
 
 
@@ -127,9 +131,6 @@ for _, row in df.iterrows():
         video_file,cookies = download_video(url, folder)
         print("\n")
         print("video has been downloaded")
-        print("\n")
-        print("Realeasing cookies")
-        release_cookie(cookies)
         
         process_video(folder, video_file)
 

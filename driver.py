@@ -76,6 +76,28 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
         release_cookie(cookies)
     return video_file
 
+def delete_file(file_path: str) -> bool:
+    """
+    Deletes a file if it exists.
+
+    Args:
+        file_path (str): Path to the file to be deleted.
+
+    Returns:
+        bool: True if the file was deleted, False if it didn't exist.
+    """
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+            print(f"[DELETED] {file_path}")
+            return True
+        except Exception as e:
+            print(f"[ERROR] Could not delete {file_path}: {e}")
+            return False
+    else:
+        print(f"[SKIPPED] {file_path} does not exist.")
+        return False
+
 
 
 
@@ -100,10 +122,11 @@ def process_video(folder: str, video_file: str):
     )
 
     if result.returncode != 0:
-        print(f"[process_video] ERROR running {run_path.name}")
+        print(f"[process_video] ERROR running {run_path}")
         print(result.stderr)
+        delete_file(os.path.join(folder,video_file))
         raise RuntimeError(f"{run_path} failed with exit code {result.returncode}")
-
+        
     print(f"[process_video] Completed successfully:\n{result.stdout}")
 
 

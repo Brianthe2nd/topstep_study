@@ -125,7 +125,7 @@ def process_video(folder: str, video_file: str):
     if result.returncode != 0:
         print(f"[process_video] ERROR running {run_path}")
         print(result.stderr)
-        delete_file(os.path.join(folder,video_file))
+        delete_file(video_file)
         raise RuntimeError(f"{run_path} failed with exit code {result.returncode}")
         
     print(f"[process_video] Completed successfully:\n{result.stdout}")

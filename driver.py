@@ -36,8 +36,8 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
     os.makedirs(folder, exist_ok=True)
     folder_name = os.path.basename(os.path.normpath(folder))
     output_template = os.path.join(folder, f"{folder_name}.%(ext)s")
-    # cookies = acquire_cookie()
-    cookies = "b603.txt"
+    cookies = acquire_cookie()
+    # cookies = "b603.txt"
     try :
     # Download video
         cmd = [
@@ -117,8 +117,8 @@ def process_video(folder: str, video_file: str):
     # Run the script as a subprocess
     result = subprocess.run(
         [python_exec, str(run_path), video_file],
-        cwd=str(folder),          # set working dir to the video folder
-        capture_output=True,      # capture stdout/stderr
+        cwd=str(folder),
+        capture_output=True,
         text=True
     )
 

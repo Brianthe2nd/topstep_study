@@ -1,7 +1,7 @@
 import time
 import requests
 
-SERVER_URL = "http://13.49.80.166:5000"  # replace with your EC2 IP or domain
+SERVER_URL = "http://13.61.152.136:5000"  # replace with your EC2 IP or domain
 
 def acquire_cookie(retry_delay=60):
     """

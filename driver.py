@@ -122,12 +122,31 @@ def process_video(folder: str, video_file: str):
         text=True
     )
 
+
     if result.returncode != 0:
         print(f"[process_video] ERROR running {run_path}")
         print(result.stderr)
         delete_file(video_file)
+
+        error_file = "errors.json"
+        error_urls = []
+
+        if os.path.exists(error_file):
+            try:
+                with open(error_file, "r", encoding="utf-8") as file:
+                    error_urls = json.load(file)
+                    if not isinstance(error_urls, list):
+                        error_urls = []
+            except (json.JSONDecodeError, ValueError):
+                # corrupted or empty file → reset
+                error_urls = []
+
+        error_urls.append(video_file)
+
+        with open(error_file, "w", encoding="utf-8") as file:
+            json.dump(error_urls, file, indent=2)
+
         raise RuntimeError(f"{run_path} failed with exit code {result.returncode}")
-        
     print(f"[process_video] Completed successfully:\n{result.stdout}")
 
 

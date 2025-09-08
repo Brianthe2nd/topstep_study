@@ -36,15 +36,16 @@ def download_video(url: str, folder: str, cookies: str = "cookies.txt") -> str:
     os.makedirs(folder, exist_ok=True)
     folder_name = os.path.basename(os.path.normpath(folder))
     output_template = os.path.join(folder, f"{folder_name}.%(ext)s")
-    cookies = acquire_cookie()
+    # cookies = acquire_cookie()
+    cookies = "b603.txt"
     try :
     # Download video
         cmd = [
             "yt-dlp",
-            "-f", "bestvideo",            # video only
-            "--cookies", cookies,         # include cookies
-            "-o", output_template,        # output file path
-            url
+            "-f", "bestvideo[height=720]",   # exactly 720p, video only
+            "--cookies", cookies,
+            "-o", output_template,
+            url,
         ]
         subprocess.run(cmd, check=True)
 
@@ -124,7 +125,7 @@ def process_video(folder: str, video_file: str):
     if result.returncode != 0:
         print(f"[process_video] ERROR running {run_path}")
         print(result.stderr)
-        delete_file(os.path.join(folder,video_file))
+        # delete_file(os.path.join(folder,video_file))
         raise RuntimeError(f"{run_path} failed with exit code {result.returncode}")
         
     print(f"[process_video] Completed successfully:\n{result.stdout}")
